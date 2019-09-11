@@ -1,0 +1,4 @@
+Value TACACS_SERVER (\d+\.\d+\.\d+\.\d+)
+
+Start
+  ^\S+\s\S+\s+.\s${TACACS_SERVER} -> Record

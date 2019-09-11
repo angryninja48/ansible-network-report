@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>spine01 report</title>
+
+    <!-- Bootstrap -->
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="../static/css/theme.css" rel="stylesheet">
+
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+          </button>
+          <a class="navbar-brand" href="/">spine01 Report</a>
+        </div>
+      </div>
+    </nav>
+    <div class="container theme-showcase" role="main">
+    <div class="page-header">
+    <h3 style="text-align:center;">spine01 - 2019-09-11-18-25-37</h3>
+    </div>
+
+
+    <h3 style="margin-top: 20px">Device Details</h3>
+
+    <table class="table table-striped">
+            <thead class="bg-dark">
+            <tr>
+                <th style="text-align:center;">Hostname</th>
+                <th style="text-align:center;">Model</th>
+                <th style="text-align:center;">Serial</th>
+                <th style="text-align:center;">OS Version</th>
+                <th style="text-align:center;">Free Memory</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+
+                <td>spine01</td>
+                <td>vEOS</td>
+                <td></td>
+                <td>4.18.5M</td>
+                <td>878.0625</td>
+
+            </tr>
+
+        </tbody>
+    </table>
+
+            <!-- FQDN -->
+
+            <h3 style="margin-top: 20px">FQDN</h3>
+            <table class="table table-striped">
+            <thead class="bg-dark">
+
+                <tr>
+                    <th colspan=3>FQDN</th>
+                </tr>
+
+                </tr>
+                <tr>
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                <tr>
+                
+                <td>spine01.lab.angrynet.ninja</td>
+                <td>spine01.lab.angrynet.ninja</td>
+                                <td><span class="label label-success">PASS</span></td>
+                
+                </tbody>
+
+            </table>
+
+
+            <!-- NTP STATUS -->
+
+            <h3 style="margin-top: 20px">NTP Status</h3>
+            <table class="table table-striped">
+            <thead class="bg-dark">
+
+                <tr>
+                    <th colspan=3>Sync</th>
+                    <th colspan=3>Server</th>
+                </tr>
+
+                </tr>
+                <tr>
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+
+                    <th>Expected value (Any)</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                <tr>
+                                
+                <td>synchronised</td>
+                <td>synchronised</td>
+                                <td><span class="label label-success">PASS</span></td>
+                
+                <td>220.233.156.30</td>
+                <td>220.233.156.30</td>
+                                <td><span class="label label-success">PASS</span></td>
+                
+
+                </tbody>
+
+            </table>
+
+    <h3 style="margin-top: 20px">Interfaces</h3>
+
+    <table class="table table-striped">
+            <thead class="bg-dark">
+            <tr>
+                <th rowspan=2>Interface</th>
+                <th colspan=3 style="text-align:center;">Up / Down</th>
+                <th colspan=3 style="text-align:center;">Speed(bps)</th>
+                <th colspan=3 style="text-align:center;">Duplex</th>
+            </tr>
+            <tr>
+                <th>Expected value</th>
+                <th>Actual Value</th>
+                <th>Pass / fail</th>
+
+                <th>Expected value</th>
+                <th>Actual Value</th>
+                <th>Pass / fail</th>
+
+                <th>Expected value</th>
+                <th>Actual Value</th>
+                <th>Pass / fail</th>
+            </tr>
+        </thead>
+        <tbody>
+                        <tr>
+                                                <td>Ethernet1</td>
+
+                <td>up</td>
+                <td>up</td>
+                                <td><span class="label label-success">PASS</span></td>
+                
+                                
+              
+
+                <td>100000000000</td>
+                <td>0</td>
+                                <td><span class="label label-danger">FAIL</span></td>
+                
+                                                <td>duplexFull</td>
+                <td>duplexFull</td>
+                                <td><span class="label label-success">PASS</span></td>
+                            </tr>
+                        <tr>
+                                                <td>Ethernet2</td>
+
+                <td>up</td>
+                <td>up</td>
+                                <td><span class="label label-success">PASS</span></td>
+                
+                                
+              
+
+                <td>100000000000</td>
+                <td>0</td>
+                                <td><span class="label label-danger">FAIL</span></td>
+                
+                                                <td>duplexFull</td>
+                <td>duplexFull</td>
+                                <td><span class="label label-success">PASS</span></td>
+                            </tr>
+            
+        </tbody>
+    </table>
+
+            <!-- LLDP -->
+            <h3 style="margin-top: 20px">LLDP</h3>
+
+            <table class="table table-striped">
+            <thead class="bg-dark">
+
+                <tr>
+                    <th rowspan=2>Interface</th>
+                    <th colspan=3>Neighbour</th>
+                    <th colspan=3>Remote Port</th>
+                </tr>
+                <tr>
+                    <!-- <td></td> -->
+
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+
+                </tr>
+                </thead>
+
+            <tbody>
+
+                        <tr>
+                                
+                                <td>Ethernet1</td>
+
+                <td>leaf01.lab.angrynet.ninja</td>
+                                <td>leaf01.lab.angrynet.ninja</td>
+                                                <td><span class="label label-success">PASS</span></td>
+                                <td>Ethernet1</td>
+                                <td>Ethernet1</td>
+                                                <td><span class="label label-success">PASS</span></td>
+                
+
+
+                </tr>
+                        <tr>
+                                
+                                <td>Ethernet2</td>
+
+                <td>leaf02.lab.angrynet.ninja</td>
+                                <td>leaf02.lab.angrynet.ninja</td>
+                                                <td><span class="label label-success">PASS</span></td>
+                                <td>Ethernet1</td>
+                                <td>Ethernet1</td>
+                                                <td><span class="label label-success">PASS</span></td>
+                
+
+
+                </tr>
+                        </tbody>
+
+          </table>
+
+            <!-- BGP -->
+
+            <h3 style="margin-top: 20px">BGP</h3>
+            <table class="table table-striped">
+            <thead class="bg-dark">
+
+                <tr>
+                    <th rowspan=2>Neighbor</th>
+                    <th colspan=3>VRF</th>
+                    <th colspan=3>Remote-AS</th>
+                    <th colspan=3>State</th>
+                </tr>
+                <tr>
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+                </tr>
+                </thead>
+                <tbody>
+                                <tr>
+                                                
+                
+                  <td>10.0.0.1</td>
+
+                  <td>default</td>
+                  <td>default</td>
+                                    <td><span class="label label-success">PASS</span></td>
+                  
+                  <td>65001</td>
+                  <td>65001</td>
+                                    <td><span class="label label-success">PASS</span></td>
+                  
+                  <td>Estab</td>
+                  <td>Estab</td>
+                                    <td><span class="label label-success">PASS</span></td>
+                                    </tr>
+                              <tr>
+                                                
+                
+                  <td>10.0.0.3</td>
+
+                  <td>default</td>
+                  <td>default</td>
+                                    <td><span class="label label-success">PASS</span></td>
+                  
+                  <td>65002</td>
+                  <td>65002</td>
+                                    <td><span class="label label-success">PASS</span></td>
+                  
+                  <td>Estab</td>
+                  <td>Estab</td>
+                                    <td><span class="label label-success">PASS</span></td>
+                                    </tr>
+                            </tbody>
+            </table>
+
+
+    </div>
+
+  </body>
+</html>

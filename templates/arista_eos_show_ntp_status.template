@@ -1,0 +1,5 @@
+Value SYNC ((?:^|(?:[.!?]\s))(\w+))
+Value NTP_SERV (\d+\.\d+\.\d+\.\d+)
+
+Start
+  ^${SYNC}\s\D+${NTP_SERV} -> Record

@@ -1,0 +1,225 @@
+- hosts: all
+  gather_facts: no
+  connection: network_cli
+  vars:
+    report_dir: "{{ playbook_dir }}/../reports"
+    template_dir: "{{ playbook_dir }}/../templates"
+
+  pre_tasks:
+    - set_fact:
+        datetime: "{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}"
+      run_once: true
+  tasks:
+
+    ########################################################################################
+
+    - name: create report directory
+      file:
+        state: directory
+        path: "{{ report_dir }}"
+      run_once: yes
+      delegate_to: localhost
+
+
+    ########################################################################################
+    # Device Facts
+    - name: interface
+      tags:
+        - dev
+      block:
+        ## Fact Gathering
+        - name: fact
+          eos_facts:
+            gather_subset:
+              - "!config"
+              - "!interfaces"
+
+    ########################################################################################
+    # FQDN Facts
+    - name: domain
+      tags:
+        - dom
+      block:
+        ## Fact Gathering
+        - name: fact
+          eos_facts:
+            gather_subset:
+              - "!hardware"
+              - "!config"
+              - "!interfaces"
+
+        ## Asserting
+        ### fqdn
+        - name: assert fqdn
+          assert:
+            that:
+              - ansible_facts.net_fqdn == "{{ inventory_hostname + '.' + dns.domain }}"
+          register: assert_result_fqdn
+          ignore_errors: yes
+
+
+    ########################################################################################
+    # NTP Facts
+    - name: ntp
+      tags:
+        - ntp
+      block:
+        ## Fact Gathering
+        - name: show ntp status
+          eos_command:
+            commands: show ntp status
+          register: ntp_result
+
+        ## Parse results
+        - name: ntp parse
+          set_fact:
+            parsed_result_ntp: "{{ ntp_result.stdout[0] | parse_cli_textfsm('templates/arista_eos_show_ntp_status.template') }}"
+
+        ## Asserting
+        ### SYNC
+        - name: assert ntp sync
+          assert:
+            that:
+              - parsed_result_ntp[0].SYNC == 'synchronised'
+          ignore_errors: yes
+          register: assert_result_ntp_sync
+
+        ### Server
+        - name: assert ntp server
+          assert:
+            that:
+              - parsed_result_ntp[0].NTP_SERV in ntp.servers
+          ignore_errors: yes
+          register: assert_result_ntp_serv
+
+    ########################################################################################
+    # Interface checking
+    - name: interface
+      tags:
+        - int
+      block:
+        ## Fact Gathering
+        - name: fact
+          eos_facts:
+            gather_subset: interfaces
+
+        ## Asserting
+        ### up/down
+        - name: assert up/down
+          assert:
+            that:
+              - ansible_facts.net_interfaces[item.key].lineprotocol == item.value.lineprotocol
+          loop: "{{ lookup('dict', interface, wantlist=True) }}"
+          register: assert_result_ud
+          ignore_errors: yes
+
+        ### bandwidth
+        - name: assert bandwidth
+          assert:
+            that:
+              - ansible_facts.net_interfaces[item.key].bandwidth == item.value.bandwidth
+          loop: "{{ lookup('dict', interface, wantlist=True) }}"
+          register: assert_result_band
+          ignore_errors: yes
+
+        ### duplex
+        - name: assert duplex
+          assert:
+            that:
+              - ansible_facts.net_interfaces[item.key].duplex == item.value.duplex
+          loop: "{{ lookup('dict', interface, wantlist=True) }}"
+          register: assert_result_duplex
+          ignore_errors: yes
+
+
+    ########################################################################################
+    # LLDP checking
+    - name: lldp
+      tags:
+        - lldp
+      block:
+        ## Fact Gathering
+        - name: fact
+          eos_facts:
+            gather_subset: interfaces
+
+        ## Asserting
+        ### Neighbour
+        - name: assert neighbor
+          assert:
+            that:
+              #https://github.com/ansible/ansible/issues/35992
+              # Returns an empty dict by default if there is no LLDP data returned on the port
+              - ((ansible_net_neighbors|json_query(query))[0]|default('{}'))['host'] | default('None') == item.value.neighbor
+          loop: "{{ lookup('dict', interface, wantlist=True) }}"
+          # Need to prepopulate json_query var due to ansible trickiness with vars and escaping quotes and backslashes
+          # The json query filter doesn't like '/' so vars like Ethernet51/1 throw an error
+          # https://stackoverflow.com/questions/54576413/ansible-and-jmespath-escape-forward-slash-in-a-json-query
+          vars:
+            query: "\"{{ item.key }}\""
+          register: assert_result_neighbor
+          ignore_errors: yes
+
+        ### Remote port
+        - name: assert remote port
+          assert:
+            that:
+              - ((ansible_net_neighbors|json_query(query))[0]|default('{}'))['port'] | default('None') == item.value.remote_port
+          loop: "{{ lookup('dict', interface, wantlist=True) }}"
+          vars:
+            query: "\"{{ item.key }}\""
+          register: assert_result_remote_port
+          ignore_errors: yes
+
+    ########################################################################################
+    # BGP checking
+    - name: bgp
+      tags:
+        - bgp
+      block:
+        ## Fact Gathering
+        - name: show ip bgp summary
+          eos_command:
+            commands: show ip bgp summary vrf all
+          register: bgp_result
+
+        ## Parse results
+        - name: bgp parse
+          set_fact:
+            parsed_result_bgp: "{{ bgp_result.stdout[0] | parse_cli_textfsm('templates/arista_eos_show_ip_bgp_summary_vrf_all.template') }}"
+
+        ## Asserting
+        ### VRF
+        - name: assert bgp vrf
+          assert:
+            that:
+              - (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', item.BGP_NEIGH ) | list | first | json_query('VRF')) == item.VRF
+          loop: "{{ bgp_neighbor }}"
+          ignore_errors: yes
+          register: assert_result_bgp_vrf
+
+        - name: assert bgp remote-as
+          assert:
+            that:
+              - (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', item.BGP_NEIGH ) | list | first | json_query('NEIGH_AS')) == item.NEIGH_AS
+          loop: "{{ bgp_neighbor }}"
+          ignore_errors: yes
+          register: assert_result_bgp_neigh_as
+
+        ### Session
+        - name: assert bgp session
+          assert:
+            that:
+              - (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', item.BGP_NEIGH ) | list | first | json_query('STATE')) == item.STATE
+          loop: "{{ bgp_neighbor }}"
+          ignore_errors: yes
+          register: assert_result_bgp_session
+
+
+    ########################################################################################
+
+    - name: Generate report
+      template:
+        src: "{{ template_dir }}/report.j2"
+        dest: "{{ report_dir }}/{{ inventory_hostname }}.html"
+      delegate_to: localhost

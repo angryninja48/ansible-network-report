@@ -1,0 +1,15 @@
+---
+# Expected results
+interface:
+  Ethernet1:
+    duplex: "duplexFull"
+    lineprotocol: "up"
+    bandwidth: 100000000000
+    neighbor: "{{ 'spine01' + '.' + dns.domain }}"
+    remote_port: "Ethernet1"
+
+bgp_neighbor:
+  - BGP_NEIGH : "10.0.0.0"
+    NEIGH_AS : "65000"
+    STATE : "Estab"
+    VRF: "default"

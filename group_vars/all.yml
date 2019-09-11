@@ -1,0 +1,14 @@
+---
+timezone:
+  eos:
+    timezone: "Australia/Sydney"
+
+dns:
+  domain: "lab.angrynet.ninja"
+  servers:
+    - "1.1.1.1"
+    - "8.8.8.8"
+
+ntp:
+  servers:
+    - "220.233.156.30"

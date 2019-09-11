@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ inventory_hostname }} report</title>
+
+    <!-- Bootstrap -->
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="../static/css/theme.css" rel="stylesheet">
+
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+          </button>
+          <a class="navbar-brand" href="/">{{ inventory_hostname }} Report</a>
+        </div>
+      </div>
+    </nav>
+    <div class="container theme-showcase" role="main">
+    <div class="page-header">
+    <h3 style="text-align:center;">{{ inventory_hostname }} - {{ datetime }}</h3>
+    </div>
+
+
+    <h3 style="margin-top: 20px">Device Details</h3>
+
+    <table class="table table-striped">
+            <thead class="bg-dark">
+            <tr>
+                <th style="text-align:center;">Hostname</th>
+                <th style="text-align:center;">Model</th>
+                <th style="text-align:center;">Serial</th>
+                <th style="text-align:center;">OS Version</th>
+                <th style="text-align:center;">Free Memory</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+
+                <td>{{ ansible_net_hostname }}</td>
+                <td>{{ ansible_net_model }}</td>
+                <td>{{ ansible_net_serialnum }}</td>
+                <td>{{ ansible_net_version }}</td>
+                <td>{{ ansible_net_memfree_mb }}</td>
+
+            </tr>
+
+        </tbody>
+    </table>
+
+            <!-- FQDN -->
+
+            <h3 style="margin-top: 20px">FQDN</h3>
+            <table class="table table-striped">
+            <thead class="bg-dark">
+
+                <tr>
+                    <th colspan=3>FQDN</th>
+                </tr>
+
+                </tr>
+                <tr>
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                <tr>
+                {% set result_fqdn = assert_result_fqdn %}
+
+                <td>{{ inventory_hostname + '.' + dns.domain }}</td>
+                <td>{{ ansible_facts.net_fqdn }}</td>
+                {% if result_fqdn.failed %}
+                <td><span class="label label-danger">FAIL</span></td>
+                {% else %}
+                <td><span class="label label-success">PASS</span></td>
+                {% endif %}
+
+                </tbody>
+
+            </table>
+
+
+            <!-- NTP STATUS -->
+
+            <h3 style="margin-top: 20px">NTP Status</h3>
+            <table class="table table-striped">
+            <thead class="bg-dark">
+
+                <tr>
+                    <th colspan=3>Sync</th>
+                    <th colspan=3>Server</th>
+                </tr>
+
+                </tr>
+                <tr>
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+
+                    <th>Expected value (Any)</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                <tr>
+                {% set result_ntp_sync = assert_result_ntp_sync %}
+                {% set result_ntp_serv = assert_result_ntp_serv %}
+
+                <td>synchronised</td>
+                <td>{{ parsed_result_ntp[0].SYNC }}</td>
+                {% if result_ntp_sync.failed %}
+                <td><span class="label label-danger">FAIL</span></td>
+                {% else %}
+                <td><span class="label label-success">PASS</span></td>
+                {% endif %}
+
+                <td>{{ ntp.servers | join(',') }}</td>
+                <td>{{ parsed_result_ntp[0].NTP_SERV }}</td>
+                {% if result_ntp_serv.failed %}
+                <td><span class="label label-danger">FAIL</span></td>
+                {% else %}
+                <td><span class="label label-success">PASS</span></td>
+                {% endif %}
+
+
+                </tbody>
+
+            </table>
+
+    <h3 style="margin-top: 20px">Interfaces</h3>
+
+    <table class="table table-striped">
+            <thead class="bg-dark">
+            <tr>
+                <th rowspan=2>Interface</th>
+                <th colspan=3 style="text-align:center;">Up / Down</th>
+                <th colspan=3 style="text-align:center;">Speed(bps)</th>
+                <th colspan=3 style="text-align:center;">Duplex</th>
+            </tr>
+            <tr>
+                <th>Expected value</th>
+                <th>Actual Value</th>
+                <th>Pass / fail</th>
+
+                <th>Expected value</th>
+                <th>Actual Value</th>
+                <th>Pass / fail</th>
+
+                <th>Expected value</th>
+                <th>Actual Value</th>
+                <th>Pass / fail</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i in range(interface | length) %}
+            <tr>
+                {% set result_ud = assert_result_ud.results[loop.index0] %}
+                {% set interface = result_ud.item.key %}
+                <td>{{ interface }}</td>
+
+                <td>{{ result_ud.item.value.lineprotocol }}</td>
+                <td>{{ ansible_facts.net_interfaces[interface].lineprotocol }}</td>
+                {% if result_ud.failed %}
+                <td><span class="label label-danger">FAIL</span></td>
+                {% else %}
+                <td><span class="label label-success">PASS</span></td>
+                {% endif %}
+
+                {% set result_band = assert_result_band.results[loop.index0] %}
+                {% set interface = result_band.item.key %}
+
+              {# Figure out a better way to convert BPS to GBPS
+                {% set exp_bandwidth_int = result_band.item.value.bandwidth|int %}</td>
+                {% set res_bandwidth_int = ansible_facts.net_interfaces[interface].bandwidth|int %}</td>
+
+                <td>{{ exp_bandwidth_int / 1000000000 }}</td>
+                <td>{{ res_bandwidth_int / 1000000000 }}</td>#}
+
+
+                <td>{{ result_band.item.value.bandwidth }}</td>
+                <td>{{ ansible_facts.net_interfaces[interface].bandwidth }}</td>
+                {% if result_band.failed %}
+                <td><span class="label label-danger">FAIL</span></td>
+                {% else %}
+                <td><span class="label label-success">PASS</span></td>
+                {% endif %}
+
+                {% set result_duplex = assert_result_duplex.results[loop.index0] %}
+                {% set interface = result_duplex.item.key %}
+                <td>{{ result_duplex.item.value.duplex }}</td>
+                <td>{{ ansible_facts.net_interfaces[interface].duplex }}</td>
+                {% if result_duplex.failed %}
+                <td><span class="label label-danger">FAIL</span></td>
+                {% else %}
+                <td><span class="label label-success">PASS</span></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+
+            <!-- LLDP -->
+            <h3 style="margin-top: 20px">LLDP</h3>
+
+            <table class="table table-striped">
+            <thead class="bg-dark">
+
+                <tr>
+                    <th rowspan=2>Interface</th>
+                    <th colspan=3>Neighbour</th>
+                    <th colspan=3>Remote Port</th>
+                </tr>
+                <tr>
+                    <!-- <td></td> -->
+
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+
+                </tr>
+                </thead>
+
+            <tbody>
+
+            {% for i in range(interface | length) %}
+            <tr>
+                {% set result_neighbor = assert_result_neighbor.results[loop.index0] %}
+                {% set result_remote_port = assert_result_remote_port.results[loop.index0] %}
+
+                {% set interface = result_neighbor.item.key %}
+                <td>{{ interface }}</td>
+
+                <td>{{ result_neighbor.item.value.neighbor }}</td>
+                {% if ansible_facts.net_neighbors[interface] is defined %}
+                <td>{{ ansible_facts.net_neighbors[interface][0].host }}</td>
+                {% else %}
+                <td>None</td>
+                {% endif %}
+                {% if result_neighbor.failed %}
+                <td><span class="label label-danger">FAIL</span></td>
+                {% else %}
+                <td><span class="label label-success">PASS</span></td>
+                {% endif %}
+                <td>{{ result_remote_port.item.value.remote_port }}</td>
+                {% if ansible_facts.net_neighbors[interface] is defined %}
+                <td>{{ ansible_facts.net_neighbors[interface][0].port }}</td>
+                {% else %}
+                <td>None</td>
+                {% endif %}
+                {% if result_remote_port.failed %}
+                <td><span class="label label-danger">FAIL</span></td>
+                {% else %}
+                <td><span class="label label-success">PASS</span></td>
+                {% endif %}
+
+
+
+                </tr>
+            {% endfor %}
+            </tbody>
+
+          </table>
+
+            <!-- BGP -->
+
+            <h3 style="margin-top: 20px">BGP</h3>
+            <table class="table table-striped">
+            <thead class="bg-dark">
+
+                <tr>
+                    <th rowspan=2>Neighbor</th>
+                    <th colspan=3>VRF</th>
+                    <th colspan=3>Remote-AS</th>
+                    <th colspan=3>State</th>
+                </tr>
+                <tr>
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+
+                    <th>Expected value</th>
+                    <th>Actual Value</th>
+                    <th>Pass / fail</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for i in range(bgp_neighbor | length) %}
+                <tr>
+                {% set result_bgp_vrf = assert_result_bgp_vrf.results[loop.index0] %}
+                {% set result_bgp_neigh_as = assert_result_bgp_neigh_as.results[loop.index0] %}
+                {% set result_bgp_session = assert_result_bgp_session.results[loop.index0] %}
+
+                {% set neighbour = result_bgp_vrf.item.BGP_NEIGH %}
+
+                  <td>{{ neighbour }}</td>
+
+                  <td>{{ result_bgp_vrf.item.VRF }}</td>
+                  <td>{{ (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', neighbour) |list | first | json_query('VRF')) }}</td>
+                  {% if result_bgp_vrf.failed %}
+                  <td><span class="label label-danger">FAIL</span></td>
+                  {% else %}
+                  <td><span class="label label-success">PASS</span></td>
+                  {% endif %}
+
+                  <td>{{ result_bgp_neigh_as.item.NEIGH_AS }}</td>
+                  <td>{{ (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', neighbour) |list | first | json_query('NEIGH_AS')) }}</td>
+                  {% if result_bgp_neigh_as.failed %}
+                  <td><span class="label label-danger">FAIL</span></td>
+                  {% else %}
+                  <td><span class="label label-success">PASS</span></td>
+                  {% endif %}
+
+                  <td>{{ result_bgp_session.item.STATE }}</td>
+                  <td>{{ (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', neighbour) |list | first | json_query('STATE')) }}</td>
+                  {% if result_bgp_session.failed %}
+                  <td><span class="label label-danger">FAIL</span></td>
+                  {% else %}
+                  <td><span class="label label-success">PASS</span></td>
+                  {% endif %}
+                  </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+
+
+    </div>
+
+  </body>
+</html>
