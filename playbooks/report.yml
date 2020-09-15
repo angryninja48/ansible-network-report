@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: spine
   gather_facts: no
   connection: network_cli
   vars:
@@ -29,7 +29,7 @@
       block:
         ## Fact Gathering
         - name: fact
-          eos_facts:
+          nxos_facts:
             gather_subset:
               - "!config"
               - "!interfaces"
@@ -42,7 +42,7 @@
       block:
         ## Fact Gathering
         - name: fact
-          eos_facts:
+          nxos_facts:
             gather_subset:
               - "!hardware"
               - "!config"
@@ -66,23 +66,23 @@
       block:
         ## Fact Gathering
         - name: show ntp status
-          eos_command:
+          nxos_command:
             commands: show ntp status
           register: ntp_result
 
         ## Parse results
         - name: ntp parse
           set_fact:
-            parsed_result_ntp: "{{ ntp_result.stdout[0] | parse_cli_textfsm('templates/arista_eos_show_ntp_status.template') }}"
+            parsed_result_ntp: "{{ ntp_result.stdout[0] | parse_cli_textfsm('templates/arista_nxos_show_ntp_status.template') }}"
 
-        ## Asserting
-        ### SYNC
-        - name: assert ntp sync
-          assert:
-            that:
-              - parsed_result_ntp[0].SYNC == 'synchronised'
-          ignore_errors: yes
-          register: assert_result_ntp_sync
+        # ## Asserting
+        # ### SYNC
+        # - name: assert ntp sync
+        #   assert:
+        #     that:
+        #       - parsed_result_ntp[0].SYNC == 'synchronised'
+        #   ignore_errors: yes
+        #   register: assert_result_ntp_sync
 
         ### Server
         - name: assert ntp server
@@ -100,7 +100,7 @@
       block:
         ## Fact Gathering
         - name: fact
-          eos_facts:
+          nxos_facts:
             gather_subset: interfaces
 
         ## Asserting
@@ -140,7 +140,7 @@
       block:
         ## Fact Gathering
         - name: fact
-          eos_facts:
+          nxos_facts:
             gather_subset: interfaces
 
         ## Asserting
@@ -172,48 +172,48 @@
           ignore_errors: yes
 
     ########################################################################################
-    # BGP checking
-    - name: bgp
-      tags:
-        - bgp
-      block:
-        ## Fact Gathering
-        - name: show ip bgp summary
-          eos_command:
-            commands: show ip bgp summary vrf all
-          register: bgp_result
+    # # BGP checking
+    # - name: bgp
+    #   tags:
+    #     - bgp
+    #   block:
+    #     ## Fact Gathering
+    #     - name: show ip bgp summary
+    #       nxos_command:
+    #         commands: show ip bgp summary vrf all
+    #       register: bgp_result
 
-        ## Parse results
-        - name: bgp parse
-          set_fact:
-            parsed_result_bgp: "{{ bgp_result.stdout[0] | parse_cli_textfsm('templates/arista_eos_show_ip_bgp_summary_vrf_all.template') }}"
+    #     ## Parse results
+    #     - name: bgp parse
+    #       set_fact:
+    #         parsed_result_bgp: "{{ bgp_result.stdout[0] | parse_cli_textfsm('templates/arista_nxos_show_ip_bgp_summary_vrf_all.template') }}"
 
-        ## Asserting
-        ### VRF
-        - name: assert bgp vrf
-          assert:
-            that:
-              - (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', item.BGP_NEIGH ) | list | first | json_query('VRF')) == item.VRF
-          loop: "{{ bgp_neighbor }}"
-          ignore_errors: yes
-          register: assert_result_bgp_vrf
+    #     ## Asserting
+    #     ### VRF
+    #     - name: assert bgp vrf
+    #       assert:
+    #         that:
+    #           - (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', item.BGP_NEIGH ) | list | first | json_query('VRF')) == item.VRF
+    #       loop: "{{ bgp_neighbor }}"
+    #       ignore_errors: yes
+    #       register: assert_result_bgp_vrf
 
-        - name: assert bgp remote-as
-          assert:
-            that:
-              - (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', item.BGP_NEIGH ) | list | first | json_query('NEIGH_AS')) == item.NEIGH_AS
-          loop: "{{ bgp_neighbor }}"
-          ignore_errors: yes
-          register: assert_result_bgp_neigh_as
+    #     - name: assert bgp remote-as
+    #       assert:
+    #         that:
+    #           - (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', item.BGP_NEIGH ) | list | first | json_query('NEIGH_AS')) == item.NEIGH_AS
+    #       loop: "{{ bgp_neighbor }}"
+    #       ignore_errors: yes
+    #       register: assert_result_bgp_neigh_as
 
-        ### Session
-        - name: assert bgp session
-          assert:
-            that:
-              - (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', item.BGP_NEIGH ) | list | first | json_query('STATE')) == item.STATE
-          loop: "{{ bgp_neighbor }}"
-          ignore_errors: yes
-          register: assert_result_bgp_session
+    #     ### Session
+    #     - name: assert bgp session
+    #       assert:
+    #         that:
+    #           - (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', item.BGP_NEIGH ) | list | first | json_query('STATE')) == item.STATE
+    #       loop: "{{ bgp_neighbor }}"
+    #       ignore_errors: yes
+    #       register: assert_result_bgp_session
 
 
     ########################################################################################

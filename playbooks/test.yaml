@@ -1,0 +1,7 @@
+- hosts: all
+  gather_facts: no
+  connection: network_cli
+  tasks:
+  - name: Nexus
+    nxos_facts:
+      gather_subset: interfaces

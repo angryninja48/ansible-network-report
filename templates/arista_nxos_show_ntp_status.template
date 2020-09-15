@@ -1,0 +1,4 @@
+Value NTP_SERV (\d+\.\d+\.\d+\.\d+)
+
+Start
+  ^${NTP_SERV} -> Record

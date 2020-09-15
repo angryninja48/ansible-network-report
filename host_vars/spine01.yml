@@ -1,18 +1,18 @@
 ---
 # Expected results
 interface:
-  Ethernet1:
+  Ethernet1/1:
     duplex: "duplexFull"
     lineprotocol: "up"
     bandwidth: 100000000000
     neighbor: "{{ 'leaf01' + '.' + dns.domain }}"
-    remote_port: "Ethernet1"
+    remote_port: "Ethernet1/1"
   Ethernet2:
     duplex: "duplexFull"
     lineprotocol: "up"
     bandwidth: 100000000000
     neighbor: "{{ 'leaf02' + '.' + dns.domain }}"
-    remote_port: "Ethernet1"
+    remote_port: "Ethernet1/1"
 
 bgp_neighbor:
   - BGP_NEIGH : "10.0.0.1"

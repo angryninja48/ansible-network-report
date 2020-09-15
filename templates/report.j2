@@ -304,43 +304,43 @@
                     <th>Pass / fail</th>
                 </tr>
                 </thead>
-                <tbody>
-                {% for i in range(bgp_neighbor | length) %}
-                <tr>
-                {% set result_bgp_vrf = assert_result_bgp_vrf.results[loop.index0] %}
-                {% set result_bgp_neigh_as = assert_result_bgp_neigh_as.results[loop.index0] %}
-                {% set result_bgp_session = assert_result_bgp_session.results[loop.index0] %}
+            #     <tbody>
+            #     {% for i in range(bgp_neighbor | length) %}
+            #     <tr>
+            #     {% set result_bgp_vrf = assert_result_bgp_vrf.results[loop.index0] %}
+            #     {% set result_bgp_neigh_as = assert_result_bgp_neigh_as.results[loop.index0] %}
+            #     {% set result_bgp_session = assert_result_bgp_session.results[loop.index0] %}
 
-                {% set neighbour = result_bgp_vrf.item.BGP_NEIGH %}
+            #     {% set neighbour = result_bgp_vrf.item.BGP_NEIGH %}
 
-                  <td>{{ neighbour }}</td>
+            #       <td>{{ neighbour }}</td>
 
-                  <td>{{ result_bgp_vrf.item.VRF }}</td>
-                  <td>{{ (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', neighbour) |list | first | json_query('VRF')) }}</td>
-                  {% if result_bgp_vrf.failed %}
-                  <td><span class="label label-danger">FAIL</span></td>
-                  {% else %}
-                  <td><span class="label label-success">PASS</span></td>
-                  {% endif %}
+            #       <td>{{ result_bgp_vrf.item.VRF }}</td>
+            #       <td>{{ (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', neighbour) |list | first | json_query('VRF')) }}</td>
+            #       {% if result_bgp_vrf.failed %}
+            #       <td><span class="label label-danger">FAIL</span></td>
+            #       {% else %}
+            #       <td><span class="label label-success">PASS</span></td>
+            #       {% endif %}
 
-                  <td>{{ result_bgp_neigh_as.item.NEIGH_AS }}</td>
-                  <td>{{ (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', neighbour) |list | first | json_query('NEIGH_AS')) }}</td>
-                  {% if result_bgp_neigh_as.failed %}
-                  <td><span class="label label-danger">FAIL</span></td>
-                  {% else %}
-                  <td><span class="label label-success">PASS</span></td>
-                  {% endif %}
+            #       <td>{{ result_bgp_neigh_as.item.NEIGH_AS }}</td>
+            #       <td>{{ (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', neighbour) |list | first | json_query('NEIGH_AS')) }}</td>
+            #       {% if result_bgp_neigh_as.failed %}
+            #       <td><span class="label label-danger">FAIL</span></td>
+            #       {% else %}
+            #       <td><span class="label label-success">PASS</span></td>
+            #       {% endif %}
 
-                  <td>{{ result_bgp_session.item.STATE }}</td>
-                  <td>{{ (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', neighbour) |list | first | json_query('STATE')) }}</td>
-                  {% if result_bgp_session.failed %}
-                  <td><span class="label label-danger">FAIL</span></td>
-                  {% else %}
-                  <td><span class="label label-success">PASS</span></td>
-                  {% endif %}
-                  </tr>
-              {% endfor %}
-              </tbody>
+            #       <td>{{ result_bgp_session.item.STATE }}</td>
+            #       <td>{{ (parsed_result_bgp | selectattr('BGP_NEIGH', 'equalto', neighbour) |list | first | json_query('STATE')) }}</td>
+            #       {% if result_bgp_session.failed %}
+            #       <td><span class="label label-danger">FAIL</span></td>
+            #       {% else %}
+            #       <td><span class="label label-success">PASS</span></td>
+            #       {% endif %}
+            #       </tr>
+            #   {% endfor %}
+            #   </tbody>
             </table>
 
 
